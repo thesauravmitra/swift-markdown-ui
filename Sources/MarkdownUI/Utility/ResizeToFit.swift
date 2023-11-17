@@ -10,11 +10,7 @@ struct ResizeToFit<Content>: View where Content: View {
   }
 
   var body: some View {
-    if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
-      ResizeToFit2 { self.content }
-    } else {
-      ResizeToFit1(idealSize: self.idealSize, content: self.content)
-    }
+    ResizeToFit1(idealSize: self.idealSize, content: self.content)
   }
 }
 
@@ -54,32 +50,5 @@ private struct SizePreference: PreferenceKey {
 
   static func reduce(value: inout CGSize?, nextValue: () -> CGSize?) {
     value = value ?? nextValue()
-  }
-}
-
-// MARK: - Layout based
-
-@available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *)
-private struct ResizeToFit2: Layout {
-  func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-    guard let view = subviews.first else {
-      return .zero
-    }
-
-    var size = view.sizeThatFits(.unspecified)
-
-    if let width = proposal.width, size.width > width {
-      let aspectRatio = size.width / size.height
-      size.width = width
-      size.height = width / aspectRatio
-    }
-    return size
-  }
-
-  func placeSubviews(
-    in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
-  ) {
-    guard let view = subviews.first else { return }
-    view.place(at: bounds.origin, proposal: .init(bounds.size))
   }
 }
